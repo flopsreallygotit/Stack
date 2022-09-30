@@ -1,6 +1,6 @@
 CXX=g++
 CXXFLAGS=-c -Wall -Wextra -ggdb3 -fsanitize=leak -lasan
-SOURCES=main.cpp stackUtils.cpp universalUtils.cpp
+SOURCES=main.cpp stackUtils.cpp configStack.cpp universalUtils.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=main
 

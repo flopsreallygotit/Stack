@@ -41,6 +41,9 @@ void logFunction (const char *file, size_t line, const char *argumentsFormat, ..
 #define logThis(__FORMAT__, __ARGS__, ...) \
     logFunction(__FILE__, __LINE__, __FORMAT__, __ARGS__);
 
+/// @brief Reallocates memory for pointer and nulling it.
+/// @param ptr Pointer.
+/// @param newSize New pointer memory size.
 void *recalloc (void *ptr, size_t newSize);
 
 #endif
