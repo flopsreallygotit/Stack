@@ -11,11 +11,13 @@ const elem_t Poison = 0x600DDED;
 
 #ifdef DEBUG
 
+unsigned long long canaryGenerate (void);
+
 /// @brief Canary type for stack.
 typedef unsigned long long canary_t;
-const canary_t Canary1 = -1;
-const canary_t Canary2 = (Canary1 * 10 - Canary1 % 10) * 10;
-const canary_t Canary3 = (Canary2 * 10 - Canary2 % 10) * 10;
+const canary_t Canary1 = canaryGenerate();
+const canary_t Canary2 = (Canary1 * 10 - Canary1 % 10) / 10;
+const canary_t Canary3 = -1;
 
 /// @brief Stack struct.
 typedef struct stack

@@ -1,61 +1,5 @@
 #include "stackUtils.h"
-#include <stdlib.h>
 #include <math.h>
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/* TODO
-int notZeroSymbol (void)
-{
-    int symbol = rand();
-    while (symbol <= 0 || symbol >= 10)
-        symbol = symbol % 10 + 1;
-
-    return symbol;
-}
-
-int calculateMaxLength (void)
-{
-    unsigned long long maxULL = -1;
-    int maxLength = 0;
-
-    while (maxULL > 0)
-    {
-        maxULL -= maxULL % 10;
-        maxULL /= 10;
-        maxLength++;
-    }
-
-    return maxLength;
-}
-
-unsigned long long canaryGenerate (void)
-{
-    int maxLength = calculateMaxLength();
-    unsigned long long canary = 0, power = 1;
-
-    for (int i = 0; i < maxLength - 1; i++)
-    {
-        canary += notZeroSymbol() * power;
-        power  *= 10;
-    }
-    
-    return canary + power;
-}
-
-int maxLengthCheck (void)
-{
-    size_t maxSizeValue = -1;
-    int length = 0;
-
-    while (maxSizeValue)
-    {
-        maxSizeValue /= 10;
-        length++;
-    }
-
-    return length;
-}
-*/
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -68,10 +12,10 @@ ISERROR stackVerifier (stack *stk)
     if (stk->capacity && stk->data)
     {
         checkError((stk->currentSum) == hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t)), WRONGSUM);
-        checkError(stk->birthFile, NULLPOINTER);
-        checkError(stk->leftCanary   == Canary1, LEFTCANARY);
+        checkError(stk->birthFile,               NULLPOINTER );
+        checkError(stk->leftCanary   == Canary1, LEFTCANARY  );
         checkError(stk->middleCanary == Canary2, MIDDLECANARY);
-        checkError(stk->rightCanary  == Canary3, RIGHTCANARY);
+        checkError(stk->rightCanary  == Canary3, RIGHTCANARY );
     }
     return NOTERROR;
 }
@@ -102,8 +46,10 @@ ISERROR stackDumpFunction (stack *stk, const char *stkName,
     else
         printf(BOLDRED "(ERROR: %d)\n" RESET, (int) ERROR);
 
-    printf("{\n" BOLD "    Capacity: %ld\n    First free index: %ld\n    Current sum: %ld\n" RESET, 
-           stk->capacity, stk->size, stk->currentSum);
+    printf("{\n" BOLD "    Capacity: %ld\n    First free index: %ld\n    Current sum: %ld\n" 
+           "    Left canary: %llu\n    Middle canary: %llu\n    Right canary: %llu\n" RESET, 
+           stk->capacity, stk->size, stk->currentSum,
+           stk->leftCanary, stk->middleCanary, stk->rightCanary);
 
     if (stk->size > 0)
         for (size_t idx = 0; idx < stk->capacity; idx++)
