@@ -3,7 +3,7 @@
 #include <math.h>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+/* TODO
 int notZeroSymbol (void)
 {
     int symbol = rand();
@@ -55,8 +55,26 @@ int maxLengthCheck (void)
 
     return length;
 }
+*/
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#ifdef DEBUG
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ISERROR stackVerifier (stack *stk)
+{
+    if (stk->capacity && stk->data)
+    {
+        checkError((stk->currentSum) == hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t)), WRONGSUM);
+        checkError(stk->birthFile, NULLPOINTER);
+        checkError(stk->leftCanary   == Canary1, LEFTCANARY);
+        checkError(stk->middleCanary == Canary2, MIDDLECANARY);
+        checkError(stk->rightCanary  == Canary3, RIGHTCANARY);
+    }
+    return NOTERROR;
+}
 
 size_t hashCalculate (char *dataStructure, size_t dataStructureSize)
 {
@@ -68,18 +86,6 @@ size_t hashCalculate (char *dataStructure, size_t dataStructureSize)
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-ISERROR stackVerifier (stack *stk)
-{
-    if (stk->capacity && stk->data)
-    {
-        checkError((stk->currentSum) == hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t)), WRONGSUM);
-        checkError(stk->birthFile, NULLPOINTER);
-        checkError(stk->leftCanary  != Canary1, LEFTCANARY);
-        checkError(stk->rightCanary != Canary2, RIGHTCANARY);
-    }
-    return NOTERROR;
-}
 
 ISERROR stackDumpFunction (stack *stk, const char *stkName, 
                            const char *file, int line)
@@ -120,15 +126,13 @@ ISERROR stackDumpFunction (stack *stk, const char *stkName,
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#endif
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ISERROR stackConstructorFunction (stack *stk, size_t capacity, const char *file, size_t line)
 {
     checkError(stk, NULLPOINTER);
-
-    // stk->leftCanary  = canaryGenerate();
-    // stk->rightCanary = canaryGenerate(); TODO different Canary Generate
-
-    stk->leftCanary = Canary1;
-    stk->leftCanary = Canary2;
 
     stk->capacity = capacity;
     stk->size     = 0;
@@ -142,10 +146,16 @@ ISERROR stackConstructorFunction (stack *stk, size_t capacity, const char *file,
         stk->isPoison[idx] = 1;     
     }
 
+    #ifdef DEBUG
+    stk->leftCanary   = Canary1;
+    stk->middleCanary = Canary2;
+    stk->rightCanary  = Canary3;
+    
     stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
 
     stk->birthLine = line;
     stk->birthFile = file;
+    #endif
 
     return NOTERROR;
 }
@@ -156,7 +166,10 @@ ISERROR stackDestructor (stack *stk)
 
     stk->capacity   = 0;
     stk->size       = 0;
+
+    #ifdef DEBUG
     stk->currentSum = 0;
+    #endif
 
     stk->data       = NULL;
     stk->isPoison   = NULL;
@@ -190,24 +203,35 @@ ISERROR stackPush (stack *stk, elem_t element)
 {
     checkError(stk,                      NULLPOINTER);
     checkError(isfinite(element),        ISNOTFINITE);
+
+    #ifdef DEBUG
     checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    #endif
 
     if (stk->size >= stk->capacity)
         stackResize(stk);
 
     stk->data[stk->size] = element;
     stk->isPoison[stk->size] = 0;
+
+    #ifdef DEBUG
     stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
+    checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    #endif
+
     stk->size++;
 
-    return stackVerifier(stk);
+    return NOTERROR;
 }
 
 ISERROR stackPop (stack *stk)
 {
     checkError(stk,                      NULLPOINTER);
     checkError(stk->size != 0,           POPOUTEMPTY);
+    
+    #ifdef DEBUG
     checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    #endif
    
     stk->size--;
 
@@ -220,9 +244,12 @@ ISERROR stackPop (stack *stk)
         stk->isPoison = (int *) realloc (stk->isPoison, 1 + sizeof(int) * (stk->capacity));
     }
 
+    #ifdef DEBUG
     stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
+    checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    #endif
 
-    return stackVerifier(stk);
+    return NOTERROR;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
