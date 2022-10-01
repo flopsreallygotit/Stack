@@ -128,6 +128,10 @@ ISERROR simpleStackDump(stack *stk)
         printf(BOLD "    Left data canary: %llx\n" RESET, *(canary_t *) stk->data);
 
         movePointerOnCanaryCount(&(stk->data),  1);
+
+        stk->data += stk->capacity;
+        printf(BOLD "    Right data canary: %llx\n" RESET, *(canary_t *) stk->data);
+        stk->data -= stk->capacity;
         #endif
 
         for (size_t idx = 0; idx < stk->capacity; idx++)
