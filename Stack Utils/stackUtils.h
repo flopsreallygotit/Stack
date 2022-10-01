@@ -65,19 +65,24 @@ ISERROR stackVerifier (stack *stk);
 /// @param canaryCount Canary Count.
 ISERROR movePointerOnCanaryCount (elem_t **data, int canaryCount);
 
+#ifdef DATACANARY
 /// @brief Saves canary on address that canary pointer points on.
 /// @param canary Canary.
 /// @param canaryPointer Pointer to canary.
 ISERROR saveCanary (canary_t canary, canary_t *canaryPointer);
+#endif
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/// @brief Dumps lesser info than default stack file using no additional info.
+/// @param stk Stack.
+ISERROR simpleStackDump(stack *stk);
 
 /// @brief Dumps stack to console.
 /// @param stk Pointer to stack.
 /// @param stkName Name of stack variable.
 /// @param file File where stack contains.
 /// @param line Line where stack contains.
-/// @return Value of stackVerifier(stk).
 ISERROR stackDumpFunction(stack *stk, const char *stkName, 
                           const char *file, int line);
 

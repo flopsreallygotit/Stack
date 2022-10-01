@@ -1,6 +1,7 @@
 #include "universalUtils.h"
 #include <stdlib.h>
 #include <malloc.h>
+#include <string.h>
 
 static FILE *logOutput = NULL;
 
@@ -29,7 +30,7 @@ void *recalloc (void *ptr, size_t newSize)
     ptr = realloc(ptr, newSize);
     char *endptr = (char *) ptr;
 
-    for (size_t idx = oldSize; idx < newSize; idx++) // use memset
+    for (size_t idx = oldSize; idx < newSize; idx++) 
         endptr[idx] = 0;
 
     return ptr;

@@ -3,7 +3,10 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define DEBUG
+#define STRUCTCANARY
+#define DATACANARY
+#define HASH
+#define BIRTHINFO
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -15,55 +18,47 @@ const elem_t Poison = 0x666DED;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#ifdef DEBUG
-
+typedef unsigned long long canary_t;
 int calculateMaxLength (void);
 unsigned long long canaryGenerate (void);
 
-/// @brief Canary type for stack.
-typedef unsigned long long canary_t;
-
+#ifdef STRUCTCANARY
 const canary_t Canary1 = canaryGenerate();
 const canary_t Canary2 = -1;
+#endif
+
+#ifdef DATACANARY
 const canary_t Canary3 = -1;
 const canary_t Canary4 = canaryGenerate();
-
-/// @brief Stack struct.
-typedef struct stack
-{
-    canary_t leftCanary; 
-
-    elem_t *data;
-    int    *isPoison;
-
-    size_t  capacity;
-    size_t  size;
-
-    size_t  currentSum;
-
-    size_t      birthLine;
-    const char *birthFile;
-
-    // TODO add printer func void *(printer_func(elem_t));
-
-    canary_t rightCanary;
-} stack;
+#endif
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#else
-
 /// @brief Stack struct.
 typedef struct stack
 {
+    #ifdef STRUCTCANARY
+    canary_t leftCanary;
+    #endif
+
     elem_t *data;
     int    *isPoison;
 
     size_t  capacity;
     size_t  size;
-} stack;
 
-#endif
+    #ifdef HASH
+    size_t  currentSum;
+    #endif
+
+    #ifdef BIRTHINFO
+    size_t      birthLine;
+    const char *birthFile;
+    #endif
+
+    #ifdef STRUCTCANARY
+    canary_t rightCanary;
+    #endif
+} stack;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
