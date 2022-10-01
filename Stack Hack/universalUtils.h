@@ -46,4 +46,5 @@ void logFunction (const char *file, size_t line, const char *argumentsFormat, ..
 /// @param newSize New pointer memory size.
 void *recalloc (void *ptr, size_t newSize);
 
+
 #endif
