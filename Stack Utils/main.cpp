@@ -36,7 +36,5 @@ int main ()
     doThis(stackDestructor(&stk1));
     doThis(stackDump(&stk1));
 
-    logThis("%s\n", "------");
-
     return 0;
 }

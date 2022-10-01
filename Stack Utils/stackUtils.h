@@ -57,6 +57,18 @@ ISERROR stackVerifier (stack *stk);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// @brief Moves pointer to data on canary count.
+/// @param data Data.
+/// @param canaryCount Canary Count.
+ISERROR movePointerOnCanaryCount (elem_t **data, int canaryCount);
+
+/// @brief Saves canary on address that canary pointer points on.
+/// @param canary Canary.
+/// @param canaryPointer Pointer to canary.
+ISERROR saveCanary (canary_t canary, canary_t *canaryPointer);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 /// @brief Dumps stack to console.
 /// @param stk Pointer to stack.
 /// @param stkName Name of stack variable.
@@ -71,19 +83,22 @@ ISERROR stackDumpFunction(stack *stk, const char *stkName,
     stackDumpFunction(stk, #stk, __FILE__, __LINE__)
 
 /// @brief Outputs element of int type.
-void elementOutput (int    element);
+void elementOutput (const int    element);
 
 /// @brief Outputs element of double type.
-void elementOutput (double element);
+void elementOutput (const double element);
 
 /// @brief Outputs element of char type.
-void elementOutput (char   element);
+void elementOutput (const char   element);
 
 /// @brief Outputs element of long type.
-void elementOutput (long   element);
+void elementOutput (const long   element);
 
 /// @brief Outputs element of short type.
-void elementOutput (short  element);
+void elementOutput (const short  element);
+
+/// @brief Outputs element hex version.
+void elementOutput (const void *element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

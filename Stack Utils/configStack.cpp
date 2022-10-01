@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include <time.h>
+#include "configStack.h"
 
 int notZeroSymbol (void)
 {
     int symbol = rand();
-    while (symbol <= 0 || symbol >= 10)
+    while (symbol == 0 || symbol >= 10)
         symbol = symbol % 10 + 1;
 
     return symbol;
@@ -12,25 +13,25 @@ int notZeroSymbol (void)
 
 int calculateMaxLength (void)
 {
-    unsigned long long maxULL = -1;
-    int maxLength = 0;
+    canary_t maxCanary = -1;
+    int maxLength = 0; 
 
-    while (maxULL > 0)
+    while (maxCanary > 0)
     {
-        maxULL -= maxULL % 10;
-        maxULL /= 10;
+        maxCanary -= maxCanary % 10;
+        maxCanary /= 10;
         maxLength++;
     }
 
     return maxLength;
 }
 
-unsigned long long canaryGenerate (void)
+canary_t canaryGenerate (void)
 {
-    int maxLength = calculateMaxLength();
-    unsigned long long canary = 0, power = 1;
+    int canaryLength = calculateMaxLength();
+    canary_t canary = 0, power = 1;
 
-    for (int i = 0; i < maxLength - 1; i++)
+    for (int i = 0; i < canaryLength - 1; i++)
     {
         canary += notZeroSymbol() * power;
         power  *= 10;
