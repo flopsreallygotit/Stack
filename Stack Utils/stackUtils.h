@@ -9,37 +9,40 @@
 enum ISERROR
 {
     /// Shows that function fulfilled without errors.
-    NOTERROR     = 0x00,
+    NOTERROR        = 0x00,
 
     /// Pointer is NULL.
-    NULLPOINTER  = 0x10,
+    NULLPOINTER     = 0x10,
 
     /// Variables are not equal or inequality unfulfilled.
-    INEQUALITY   = 0x20,
+    INEQUALITY      = 0x20,
 
     /// Value of variable is NAN, inf or overflow max limit of it type.
-    ISNOTFINITE  = 0x30,
+    ISNOTFINITE     = 0x30,
 
-    /// Wrong sum.
-    WRONGSUM     = 0x40,
+    /// Wrong sum. 
+    WRONGSUM        = 0x40,
 
     /// Pop from empty stack.
-    POPOUTEMPTY  = 0x50,
+    POPOUTEMPTY     = 0x50,
 
     /// Left canary died.
-    LEFTCANARY   = 0x60,
-
-    /// Middle canary.
-    MIDDLECANARY = 0x70,
+    LEFTCANARY      = 0x60,
 
     /// Right canary died.
-    RIGHTCANARY  = 0x80,
+    RIGHTCANARY     = 0x70,
+
+    /// Data left canary.
+    DATALEFTCANARY  = 0x80,
+
+    /// Data right canary died.
+    DATARIGHTCANARY = 0x90,
 
     /// Stack is wrong.
-    WRONGSTACK   = 0x90,
+    WRONGSTACK      = 0x100,
 
     /// General error.
-    ERROR        = 0x100
+    ERROR           = 0x110
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,14 +123,18 @@ ISERROR stackDestructor (stack *stk);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Resizes stack.
+/// @brief Resizes stack for element push.
 /// @param stk Pointer to stack.
-ISERROR stackResize (stack *stk);
+ISERROR stackPushResize (stack *stk);
 
 /// @brief Pushes element from stack.
 /// @param stk Pointer to stack.
 /// @param element Element.
 ISERROR stackPush   (stack *stk, elem_t element);
+
+/// @brief Resizes stack for element pop.
+/// @param stk Pointer to stack.
+ISERROR stackPopResize (stack *stk);
 
 /// @brief Deletes last pushed element from stack.
 /// @param stk Pointer to stack.

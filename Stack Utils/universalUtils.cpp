@@ -31,8 +31,6 @@ void *recalloc (void *ptr, size_t newSize)
 
     for (size_t idx = oldSize; idx < newSize; idx++) // use memset
         endptr[idx] = 0;
-    for (size_t idx = newSize; idx < oldSize; idx++)
-        endptr[idx] = 0;
 
     return ptr;
 }
