@@ -13,6 +13,7 @@ ISERROR stackVerifier (stack *stk)
             simpleStackDump(stk);
             return WRONGSTACK;
         }
+
         #ifdef HASH
         if ((stk->currentSum) != hashCalculate((char *) stk->data, 
                    (stk->capacity) * sizeof(elem_t)))
@@ -108,7 +109,7 @@ ISERROR simpleStackDump(stack *stk)
 {
     checkError(stk, NULLPOINTER);
 
-    printf("{\n" BOLD "    Capacity: %ld\n    First free index: %ld\n" RESET,
+    printf("{\n" BOLD "    Capacity: %lu\n    First free index: %lu\n" RESET,
            stk->capacity, stk->size);
 
     #ifdef HASH
@@ -136,7 +137,7 @@ ISERROR simpleStackDump(stack *stk)
 
         for (size_t idx = 0; idx < stk->capacity; idx++)
         {
-            printf("    [%ld]:  ", idx);
+            printf("    [%lu]:  ", idx);
             elementOutput(stk->data[idx]);
             if (stk->isPoison[idx])
                 printf(BOLDRED " (Poison)" RESET);
@@ -194,7 +195,7 @@ ISERROR stackConstructorFunction (stack *stk, size_t capacity, const char *file,
     movePointerOnCanaryCount(&(stk->data), 1);
 
     stk->data += capacity;
-    saveCanary(Canary4, (canary_t *) stk->data);
+    saveCanary (Canary4, (canary_t *) stk->data);
     stk->data -=capacity;
 
     #else
@@ -258,14 +259,6 @@ ISERROR stackPushResize (stack *stk)
 
     if (stk->size < stk->capacity)
         return NOTERROR;
-
-    #ifdef DATACANARY
-    stk->data += stk->capacity;
-    canary_t *oldCanary = (canary_t *) stk->data;
-    stk->data -= stk->capacity;
-
-    *oldCanary = 0;
-    #endif
 
     stk->capacity *= 2;
 
@@ -345,7 +338,7 @@ ISERROR stackPopResize (stack *stk)
     return NOTERROR;
 }
 
-ISERROR stackPop (stack *stk)
+ISERROR stackPop (stack *stk, elem_t *element)
 {
     checkError(stk,            NULLPOINTER);
     checkError(stk->size != 0, POPOUTEMPTY);
@@ -353,6 +346,9 @@ ISERROR stackPop (stack *stk)
     checkError(stackVerifier(stk) == NOTERROR, ERROR);
    
     stk->size--;
+
+    if (element)
+        *element = stk->data[stk->size];
 
     stk->data[stk->size] = Poison;
     stk->isPoison[stk->size] = 1;

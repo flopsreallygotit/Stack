@@ -76,14 +76,14 @@ ISERROR saveCanary (canary_t canary, canary_t *canaryPointer);
 
 /// @brief Dumps lesser info than default stack file using no additional info.
 /// @param stk Stack.
-ISERROR simpleStackDump(stack *stk);
+ISERROR simpleStackDump (stack *stk);
 
 /// @brief Dumps stack to console.
 /// @param stk Pointer to stack.
 /// @param stkName Name of stack variable.
 /// @param file File where stack contains.
 /// @param line Line where stack contains.
-ISERROR stackDumpFunction(stack *stk, const char *stkName, 
+ISERROR stackDumpFunction (stack *stk, const char *stkName, 
                           const char *file, int line);
 
 /// Shell for StackDumpFunction.
@@ -135,15 +135,15 @@ ISERROR stackPushResize (stack *stk);
 /// @brief Pushes element from stack.
 /// @param stk Pointer to stack.
 /// @param element Element.
-ISERROR stackPush   (stack *stk, elem_t element);
+ISERROR stackPush       (stack *stk, elem_t element);
 
 /// @brief Resizes stack for element pop.
 /// @param stk Pointer to stack.
-ISERROR stackPopResize (stack *stk);
+ISERROR stackPopResize  (stack *stk);
 
 /// @brief Deletes last pushed element from stack.
 /// @param stk Pointer to stack.
-ISERROR stackPop    (stack *stk);
+ISERROR stackPop        (stack *stk, elem_t *element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

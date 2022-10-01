@@ -24,11 +24,11 @@ unsigned long long canaryGenerate (void);
 
 #ifdef STRUCTCANARY
 const canary_t Canary1 = canaryGenerate();
-const canary_t Canary2 = -1;
+const canary_t Canary2 = canaryGenerate();
 #endif
 
 #ifdef DATACANARY
-const canary_t Canary3 = -1;
+const canary_t Canary3 = canaryGenerate();
 const canary_t Canary4 = canaryGenerate();
 #endif
 

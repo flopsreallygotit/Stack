@@ -24,14 +24,17 @@ int main ()
     doThis(stackPush(&stk1, 6));
     doThis(stackDump(&stk1));
 
-    doThis(stackPop(&stk1));
+    doThis(stackPop(&stk1, NULL));
     doThis(stackDump(&stk1));
 
-    doThis(stackPop(&stk1));
+    doThis(stackPop(&stk1, NULL));
     doThis(stackDump(&stk1));
 
-    doThis(stackPop(&stk1));
+    elem_t element = 0;
+    doThis(stackPop(&stk1, &element));
     doThis(stackDump(&stk1));
+
+    elementOutput(element);
 
     doThis(stackDestructor(&stk1));
     doThis(stackDump(&stk1));
