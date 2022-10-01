@@ -52,12 +52,16 @@ ISERROR stackVerifier (stack *stk)
             return DATALEFTCANARY;
         }
 
-        if (*((canary_t *) stk->data + stk->capacity) != Canary4)
+        movePointerOnCanaryCount(&(stk->data), 1);
+        stk->data += stk->capacity;
+
+        if (*((canary_t *) stk->data) != Canary4)
         {
             simpleStackDump(stk);
             return  DATARIGHTCANARY;
         }
-        movePointerOnCanaryCount(&(stk->data), 1);
+
+        stk->data -= stk->capacity;
         #endif
     }
 
@@ -184,10 +188,13 @@ ISERROR stackConstructorFunction (stack *stk, size_t capacity, const char *file,
     saveCanary(Canary3, (canary_t *) stk->data);
 
     movePointerOnCanaryCount(&(stk->data), 1);
-    saveCanary(Canary4, (canary_t *) stk->data + capacity);
+
+    stk->data += capacity;
+    saveCanary(Canary4, (canary_t *) stk->data);
+    stk->data -=capacity;
 
     #else
-    stk->data  = (elem_t *) calloc (capacity, sizeof(elem_t));
+    stk->data = (elem_t *) calloc (capacity, sizeof(elem_t));
     #endif
 
     stk->isPoison = (int *) calloc (capacity, sizeof(int));
@@ -249,7 +256,10 @@ ISERROR stackPushResize (stack *stk)
         return NOTERROR;
 
     #ifdef DATACANARY
-    canary_t *oldCanary = (canary_t *) stk->data + stk->capacity;
+    stk->data += stk->capacity;
+    canary_t *oldCanary = (canary_t *) stk->data;
+    stk->data -= stk->capacity;
+
     *oldCanary = 0;
     #endif
 
@@ -262,10 +272,12 @@ ISERROR stackPushResize (stack *stk)
 
     movePointerOnCanaryCount(&(stk->data),  1);
 
-    saveCanary(Canary4, (canary_t *) stk->data + stk->capacity);
+    stk->data += stk->capacity;
+    saveCanary(Canary4, (canary_t *) stk->data);
+    stk->data -= stk->capacity;
 
     #else
-    stk->data  = (elem_t *) recalloc (stk->data,     (stk->capacity) * sizeof(elem_t));
+    stk->data = (elem_t *) recalloc (stk->data, (stk->capacity) * sizeof(elem_t));
     #endif
 
     stk->isPoison = (int *) recalloc (stk->isPoison, (stk->capacity) * sizeof(int));
@@ -313,9 +325,13 @@ ISERROR stackPopResize (stack *stk)
     movePointerOnCanaryCount(&(stk->data), -1);
 
     stk->data = (elem_t *) recalloc (stk->data, sizeof(elem_t) * (stk->capacity) + 2 * sizeof(canary_t));
-    saveCanary(Canary4, (canary_t *) stk->data + stk->capacity);
 
     movePointerOnCanaryCount(&(stk->data),  1);
+
+    stk->data += stk->capacity;
+    saveCanary(Canary4, (canary_t *) stk->data);
+    stk->data -= stk->capacity;
+
     #else
     stk->data = (elem_t *) recalloc (stk->data, sizeof(elem_t) * (stk->capacity));
     #endif
@@ -352,32 +368,38 @@ ISERROR stackPop (stack *stk)
 void elementOutput (const int element)
 {
     printf("%d", element);
+    return;
 }
 
 void elementOutput (const double element)
 {
     printf("%lf", element);
+    return;
 }
 
 void elementOutput (const char element)
 {
     printf("%c", element);
+    return;
 }
 
 void elementOutput (const long element)
 {
     printf("%ld", element);
+    return;
 }
 
 void elementOutput (const short element) 
 {
     printf("%hd", element);
+    return;
 }
 
 void elementOutput (const void *element) 
 {
     const elem_t Element = *(elem_t *) element;
     printf("%x", Element);
+    return;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
