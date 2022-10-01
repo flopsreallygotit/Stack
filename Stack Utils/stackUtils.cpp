@@ -313,7 +313,7 @@ ISERROR stackPush (stack *stk, elem_t element)
 
 ISERROR stackPopResize (stack *stk)
 {
-    if (stk->size > (stk->capacity) / 2)
+    if (stk->size > (stk->capacity) / 4)
         return NOTERROR;
 
     stk->capacity /= 2;
