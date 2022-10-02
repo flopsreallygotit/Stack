@@ -1,6 +1,6 @@
+#include "configStack.h"
 #include <stdlib.h>
 #include <time.h>
-#include "configStack.h"
 
 int notZeroSymbol (void)
 {

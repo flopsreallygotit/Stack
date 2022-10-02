@@ -3,6 +3,10 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#include <stdio.h>
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #define STRUCTCANARY
 #define DATACANARY
 #define HASH
@@ -43,8 +47,8 @@ typedef struct stack
     elem_t *data;
     int    *isPoison;
 
-    size_t  capacity;
-    size_t  size;
+    ssize_t  capacity;
+    ssize_t  size;
 
     #ifdef HASH
     size_t  currentSum;

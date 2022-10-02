@@ -1,7 +1,6 @@
-#include "universalUtils.h"
 #include <stdlib.h>
 #include <malloc.h>
-#include <string.h>
+#include "universalUtils.h"
 
 static FILE *logOutput = NULL;
 

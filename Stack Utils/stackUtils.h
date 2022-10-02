@@ -51,7 +51,7 @@ enum ISERROR
 /// @param dataStructure Stack data.
 /// @param dataStructureSize Size of data.
 /// @return Hash control sum.
-size_t hashCalculate  (char *dataStructure, size_t dataStructureSize);
+size_t hashCalculate  (char *dataStructure, ssize_t dataStructureSize);
 
 /// @brief Checks that stack is correct.
 /// @param stk Pointer to stack.
@@ -77,6 +77,12 @@ ISERROR saveCanary (canary_t canary, canary_t *canaryPointer);
 /// @brief Dumps lesser info than default stack file using no additional info.
 /// @param stk Stack.
 ISERROR simpleStackDump (stack *stk);
+
+#define dumpAndReturn(stkPointer, returnValue) \
+{                                               \
+    simpleStackDump(stkPointer);                \
+    return returnValue;                         \
+}
 
 /// @brief Dumps stack to console.
 /// @param stk Pointer to stack.
@@ -115,7 +121,7 @@ void elementOutput (const void *element);
 /// @param capacity Stack capacity.
 /// @param file File where stack contains.
 /// @param line Line where stack contains.
-ISERROR stackConstructorFunction (stack *stk, size_t capacity, 
+ISERROR stackConstructorFunction (stack *stk, ssize_t capacity, 
                                   const char *file, size_t line);
 
 /// Shell for Stack Constructor Function.

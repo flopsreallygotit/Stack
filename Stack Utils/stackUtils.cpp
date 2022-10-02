@@ -1,6 +1,6 @@
-#include "stackUtils.h"
-#include "universalUtils.h"
 #include <math.h>
+#include "universalUtils.h"
+#include "stackUtils.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -9,58 +9,40 @@ ISERROR stackVerifier (stack *stk)
     if (stk->capacity && stk->data)
     {
         if (stk->size > stk->capacity)
-        {
-            simpleStackDump(stk);
-            return WRONGSTACK;
-        }
+            dumpAndReturn(stk, WRONGSTACK);
+
+        if (stk->capacity <= 0 || stk->size < 0)
+            dumpAndReturn(stk, WRONGSTACK);
 
         #ifdef HASH
         if ((stk->currentSum) != hashCalculate((char *) stk->data, 
                    (stk->capacity) * sizeof(elem_t)))
-        {
-            simpleStackDump(stk);
-            return WRONGSUM;
-        }
+            dumpAndReturn(stk, WRONGSUM);
         #endif
 
         #ifdef BIRTHINFO
         if (stk->birthFile == NULL)
-        {
-            simpleStackDump(stk);
-            return NULLPOINTER;
-        }
+            dumpAndReturn(stk, NULLPOINTER);
         #endif
 
         #ifdef STRUCTCANARY
-        if (stk->leftCanary != Canary1)
-        {
-            simpleStackDump(stk);
-            return LEFTCANARY;
-        } 
+        if (stk->leftCanary  != Canary1)
+            dumpAndReturn(stk, LEFTCANARY);
 
         if (stk->rightCanary != Canary2)
-        {
-            simpleStackDump(stk);
-            return RIGHTCANARY;
-        }
+            dumpAndReturn(stk, RIGHTCANARY);
         #endif
 
         #ifdef DATACANARY
         movePointerOnCanaryCount(&(stk->data), -1);
         if (*((canary_t *) stk->data) != Canary3)
-        {
-            simpleStackDump(stk);
-            return DATALEFTCANARY;
-        }
+            dumpAndReturn(stk, DATALEFTCANARY);
 
         movePointerOnCanaryCount(&(stk->data), 1);
         stk->data += stk->capacity;
 
         if (*((canary_t *) stk->data) != Canary4)
-        {
-            simpleStackDump(stk);
-            return  DATARIGHTCANARY;
-        }
+            dumpAndReturn(stk, DATARIGHTCANARY);
 
         stk->data -= stk->capacity;
         #endif
@@ -70,10 +52,10 @@ ISERROR stackVerifier (stack *stk)
 }
 
 #ifdef HASH
-size_t hashCalculate (char *dataStructure, size_t dataStructureSize)
+size_t hashCalculate (char *dataStructure, ssize_t dataStructureSize)
 {
     size_t controlSum = 5381;
-    for (size_t idx = 1; idx < dataStructureSize; idx++)
+    for (ssize_t idx = 1; idx < dataStructureSize; idx++)
         controlSum += idx * dataStructure[idx];
 
     return (((controlSum << 5) + controlSum) + 1);
@@ -113,11 +95,11 @@ ISERROR simpleStackDump(stack *stk)
            stk->capacity, stk->size);
 
     #ifdef HASH
-    printf(BOLD "    Current sum: %ld\n" RESET, stk->currentSum);
+    printf(BOLD "    Current sum:  %ld\n" RESET, stk->currentSum);
     #endif
 
     #ifdef STRUCTCANARY
-    printf(BOLD "    Left canary: %llx\n    Right canary: %llx\n" RESET, 
+    printf(BOLD "    Left canary:  %llx\n    Right canary: %llx\n" RESET, 
            stk->leftCanary, stk->rightCanary);
     #endif
 
@@ -126,7 +108,7 @@ ISERROR simpleStackDump(stack *stk)
         #ifdef DATACANARY
         movePointerOnCanaryCount(&(stk->data), -1);
 
-        printf(BOLD "    Left data canary: %llx\n" RESET, *(canary_t *) stk->data);
+        printf(BOLD "    Left data canary:  %llx\n" RESET, *(canary_t *) stk->data);
 
         movePointerOnCanaryCount(&(stk->data),  1);
 
@@ -135,7 +117,7 @@ ISERROR simpleStackDump(stack *stk)
         stk->data -= stk->capacity;
         #endif
 
-        for (size_t idx = 0; idx < stk->capacity; idx++)
+        for (ssize_t idx = 0; idx < stk->capacity; idx++)
         {
             printf("    [%lu]:  ", idx);
             elementOutput(stk->data[idx]);
@@ -180,9 +162,12 @@ ISERROR stackDumpFunction (stack *stk, const char *stkName,
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ISERROR stackConstructorFunction (stack *stk, size_t capacity, const char *file, size_t line)
+ISERROR stackConstructorFunction (stack *stk, ssize_t capacity, const char *file, size_t line)
 {
     checkError(stk, NULLPOINTER);
+
+    if (capacity < 0)
+        return WRONGSTACK;
 
     stk->capacity = capacity;
     stk->size     = 0;
@@ -204,7 +189,7 @@ ISERROR stackConstructorFunction (stack *stk, size_t capacity, const char *file,
 
     stk->isPoison = (int *) calloc (capacity, sizeof(int));
 
-    for (size_t idx = 0; idx < capacity; idx++)
+    for (ssize_t idx = 0; idx < capacity; idx++)
     {
         stk->data[idx] = Poison;
         stk->isPoison[idx] = 1;     
@@ -231,22 +216,27 @@ ISERROR stackDestructor (stack *stk)
 {
     checkError(stk, NULLPOINTER);
 
-    stk->capacity   = 0;
-    stk->size       = 0;
+    stk->capacity    = 0;
+    stk->size        = 0;
 
     #ifdef HASH
-    stk->currentSum = 0;
+    stk->currentSum  = 0;
     #endif
 
     #ifdef DATACANARY
     movePointerOnCanaryCount(&(stk->data), -1);
     #endif
 
+    #ifdef STRUCTCANARY
+    stk->leftCanary  = 0;
+    stk->rightCanary = 0;
+    #endif
+
     free(stk->data);
     free(stk->isPoison);
 
-    stk->data       = NULL;
-    stk->isPoison   = NULL;
+    stk->data        = NULL;
+    stk->isPoison    = NULL;
 
     return NOTERROR;
 }
@@ -260,7 +250,10 @@ ISERROR stackPushResize (stack *stk)
     if (stk->size < stk->capacity)
         return NOTERROR;
 
-    stk->capacity *= 2;
+    if (stk->capacity)
+        stk->capacity *= 2;
+    else
+        stk->capacity += 1;
 
     #ifdef DATACANARY
     movePointerOnCanaryCount(&(stk->data), -1);
@@ -279,7 +272,7 @@ ISERROR stackPushResize (stack *stk)
 
     stk->isPoison = (int *) recalloc (stk->isPoison, (stk->capacity) * sizeof(int));
 
-    for (size_t idx = stk->size; idx < stk->capacity; idx++)
+    for (ssize_t idx = stk->size; idx < stk->capacity; idx++)
     {
         stk->data[idx] = Poison; 
         stk->isPoison[idx] = 1;
@@ -290,10 +283,9 @@ ISERROR stackPushResize (stack *stk)
 
 ISERROR stackPush (stack *stk, elem_t element)
 {
-    checkError(stk,               NULLPOINTER);
-    checkError(isfinite(element), ISNOTFINITE);
-
-    checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    checkError(stk,                            NULLPOINTER);
+    checkError(isfinite(element),              ISNOTFINITE);
+    checkError(stackVerifier(stk) == NOTERROR, ERROR      );
 
     stackPushResize(stk);
 
@@ -340,10 +332,9 @@ ISERROR stackPopResize (stack *stk)
 
 ISERROR stackPop (stack *stk, elem_t *element)
 {
-    checkError(stk,            NULLPOINTER);
-    checkError(stk->size != 0, POPOUTEMPTY);
-    
-    checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    checkError(stk,                            NULLPOINTER);
+    checkError(stk->size > 0,                  POPOUTEMPTY);
+    checkError(stackVerifier(stk) == NOTERROR, ERROR      );
    
     stk->size--;
 
