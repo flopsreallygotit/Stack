@@ -156,13 +156,13 @@ ISERROR stackPop        (stack *stk, elem_t *element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define doThis(functionValue)                                                       \
-    if (!((functionValue) == NOTERROR))                                             \
-    {                                                                               \
+#define doThis(functionValue)                                                        \
+    if (!((functionValue) == NOTERROR))                                              \
+    {                                                                                \
         fprintf(stderr, BOLDRED "Error in file %s:%d line! Error code: %d;\n" RESET, \
-                __FILE__, __LINE__, (functionValue));                               \
-        return -1;                                                                  \
-    }
+                __FILE__, __LINE__, (functionValue));                                \
+        return -1;                                                                   \
+    } 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

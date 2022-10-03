@@ -1,8 +1,9 @@
 #include "stackUtils.h"
+#include "math.h"
 
 int main ()
 {
-    stack stk1 = {};
+    stack stk = {};
 
     return 0;
 }
