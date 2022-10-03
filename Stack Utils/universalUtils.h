@@ -29,7 +29,7 @@
 #define checkError(condition, returnValue)                                                               \
     if (!(condition))                                                                                    \
     {                                                                                                    \
-        fprintf(stderr, BOLDRED "Error in file %s:%d line! %s\n" RESET, __FILE__, __LINE__, #condition); \
+        fprintf(stderr, BOLDRED "Error in file %s:%d line! %s;\n" RESET, __FILE__, __LINE__, #condition); \
         return (returnValue);                                                                            \
     }
 
@@ -45,6 +45,5 @@ void logFunction (const char *file, size_t line, const char *argumentsFormat, ..
 /// @param ptr Pointer.
 /// @param newSize New pointer memory size.
 void *recalloc (void *ptr, size_t newSize);
-
 
 #endif

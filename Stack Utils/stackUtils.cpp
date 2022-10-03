@@ -9,10 +9,10 @@ ISERROR stackVerifier (stack *stk)
     if (stk->capacity && stk->data)
     {
         if (stk->size > stk->capacity)
-            dumpAndReturn(stk, WRONGSTACK);
+            dumpAndReturn(stk, WRONGSIZE);
 
         if (stk->capacity <= 0 || stk->size < 0)
-            dumpAndReturn(stk, WRONGSTACK);
+            dumpAndReturn(stk, WRONGSIZE);
 
         #ifdef HASH
         if ((stk->currentSum) != hashCalculate((char *) stk->data, 
@@ -169,11 +169,19 @@ ISERROR stackConstructorFunction (stack *stk, ssize_t capacity, const char *file
     if (capacity < 0)
         return WRONGSTACK;
 
+    #ifdef MAXCAPACITY
+    if (capacity <= maxCapacity)
+        stk->capacity = capacity;
+    else
+        return WRONGSIZE;
+    #else
     stk->capacity = capacity;
-    stk->size     = 0;
+    #endif
+
+    stk->size = 0;
 
     #ifdef DATACANARY
-    stk->data = (elem_t *) recalloc (stk->data, capacity * sizeof(elem_t) + 2 * sizeof(canary_t));
+    stk->data = (elem_t *) recalloc (stk->data, stk->capacity * sizeof(elem_t) + 2 * sizeof(canary_t));
 
     saveCanary(Canary3, (canary_t *) stk->data);
 
@@ -181,15 +189,15 @@ ISERROR stackConstructorFunction (stack *stk, ssize_t capacity, const char *file
 
     stk->data += capacity;
     saveCanary (Canary4, (canary_t *) stk->data);
-    stk->data -=capacity;
+    stk->data -= capacity;
 
     #else
-    stk->data = (elem_t *) calloc (capacity, sizeof(elem_t));
+    stk->data = (elem_t *) calloc (stk->capacity, sizeof(elem_t));
     #endif
 
-    stk->isPoison = (int *) calloc (capacity, sizeof(int));
+    stk->isPoison = (int *) calloc (stk->capacity, sizeof(int));
 
-    for (ssize_t idx = 0; idx < capacity; idx++)
+    for (ssize_t idx = 0; idx < stk->capacity; idx++)
     {
         stk->data[idx] = Poison;
         stk->isPoison[idx] = 1;     
@@ -285,7 +293,7 @@ ISERROR stackPush (stack *stk, elem_t element)
 {
     checkError(stk,                            NULLPOINTER);
     checkError(isfinite(element),              ISNOTFINITE);
-    checkError(stackVerifier(stk) == NOTERROR, ERROR      );
+    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK );
 
     stackPushResize(stk);
 
@@ -296,7 +304,7 @@ ISERROR stackPush (stack *stk, elem_t element)
     stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
     #endif
 
-    checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK);
 
     stk->size++;
 
@@ -334,7 +342,7 @@ ISERROR stackPop (stack *stk, elem_t *element)
 {
     checkError(stk,                            NULLPOINTER);
     checkError(stk->size > 0,                  POPOUTEMPTY);
-    checkError(stackVerifier(stk) == NOTERROR, ERROR      );
+    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK );
    
     stk->size--;
 
@@ -349,7 +357,7 @@ ISERROR stackPop (stack *stk, elem_t *element)
     stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
     #endif
 
-    checkError(stackVerifier(stk) == NOTERROR, ERROR);
+    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK);
 
     return NOTERROR;
 }

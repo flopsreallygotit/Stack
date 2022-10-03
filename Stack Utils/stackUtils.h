@@ -9,40 +9,43 @@
 enum ISERROR
 {
     /// Shows that function fulfilled without errors.
-    NOTERROR        = 0x00,
+    NOTERROR        = 0,
 
     /// Pointer is NULL.
-    NULLPOINTER     = 0x10,
+    NULLPOINTER     = 1,
 
     /// Variables are not equal or inequality unfulfilled.
-    INEQUALITY      = 0x20,
+    INEQUALITY      = 2,
 
     /// Value of variable is NAN, inf or overflow max limit of it type.
-    ISNOTFINITE     = 0x30,
+    ISNOTFINITE     = 3,
 
     /// Wrong sum. 
-    WRONGSUM        = 0x40,
+    WRONGSUM        = 4,
 
     /// Pop from empty stack.
-    POPOUTEMPTY     = 0x50,
+    POPOUTEMPTY     = 5,
 
     /// Left canary died.
-    LEFTCANARY      = 0x60,
+    LEFTCANARY      = 6,
 
     /// Right canary died.
-    RIGHTCANARY     = 0x70,
+    RIGHTCANARY     = 7,
 
     /// Data left canary.
-    DATALEFTCANARY  = 0x80,
+    DATALEFTCANARY  = 8,
 
     /// Data right canary died.
-    DATARIGHTCANARY = 0x90,
+    DATARIGHTCANARY = 9,
 
     /// Stack is wrong.
-    WRONGSTACK      = 0x100,
+    WRONGSTACK      = 10,
+
+    /// Stack size is wrong or capacity is bigger than MAXCAPACITY
+    WRONGSIZE       = 11,
 
     /// General error.
-    ERROR           = 0x110
+    ERROR           = 12
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -153,10 +156,13 @@ ISERROR stackPop        (stack *stk, elem_t *element);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Save shell for functions.
-/// @param[in] condition Condition that you need to check.
-#define doThis(condition) \
-    checkError(((condition) == NOTERROR), ERROR); 
+#define doThis(functionValue)                                                       \
+    if (!((functionValue) == NOTERROR))                                             \
+    {                                                                               \
+        fprintf(stderr, BOLDRED "Error in file %s:%d line! Error code: %d;\n" RESET, \
+                __FILE__, __LINE__, (functionValue));                               \
+        return -1;                                                                  \
+    }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
