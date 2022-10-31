@@ -1,6 +1,8 @@
 #ifndef STACKUTILS
 #define STACKUTILS
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #include "universalUtils.h"
 #include "configStack.h"
 
@@ -14,38 +16,35 @@ enum ISERROR
     /// Pointer is NULL.
     NULLPOINTER     = 1,
 
-    /// Variables are not equal or inequality unfulfilled.
-    INEQUALITY      = 2,
-
     /// Value of variable is NAN, inf or overflow max limit of it type.
-    ISNOTFINITE     = 3,
+    ISNOTFINITE     = 2,
 
     /// Wrong sum. 
-    WRONGSUM        = 4,
+    WRONGSUM        = 3,
 
     /// Pop from empty stack.
-    POPOUTEMPTY     = 5,
+    POPOUTEMPTY     = 4,
 
     /// Left canary died.
-    LEFTCANARY      = 6,
+    LEFTCANARY      = 5,
 
     /// Right canary died.
-    RIGHTCANARY     = 7,
+    RIGHTCANARY     = 6,
 
     /// Data left canary.
-    DATALEFTCANARY  = 8,
+    DATALEFTCANARY  = 7,
 
     /// Data right canary died.
-    DATARIGHTCANARY = 9,
+    DATARIGHTCANARY = 8,
 
     /// Stack is wrong.
-    WRONGSTACK      = 10,
+    WRONGSTACK      = 9,
 
     /// Stack size is wrong or capacity is bigger than MAXCAPACITY
-    WRONGSIZE       = 11,
+    WRONGSIZE       = 10,
 
     /// General error.
-    ERROR           = 12
+    ERROR           = 11,
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,16 +123,16 @@ void elementOutput (const void *element);
 /// @param capacity Stack capacity.
 /// @param file File where stack contains.
 /// @param line Line where stack contains.
-ISERROR stackConstructorFunction (stack *stk, ssize_t capacity, 
-                                  const char *file, size_t line);
+stack *stackConstructorFunction (ssize_t capacity, 
+                                 const char *file, size_t line);
 
 /// Shell for Stack Constructor Function.
-#define stackConstructor(stk, cpty) \
-    stackConstructorFunction(stk, cpty, __FILE__, __LINE__)
+#define stackConstructor(cpty) \
+    stackConstructorFunction(cpty, __FILE__, __LINE__)
 
 /// @brief Destructs stack.
 /// @param stk Pointer to stack.
-ISERROR stackDestructor (stack *stk);
+void stackDestructor (stack *stk);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

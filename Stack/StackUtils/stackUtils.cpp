@@ -1,6 +1,36 @@
 #include <math.h>
-#include "universalUtils.h"
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #include "stackUtils.h"
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+struct stack_
+{
+    #ifdef STRUCTCANARY
+    canary_t leftCanary;
+    #endif
+
+    elem_t *data;
+    int    *isPoison;
+
+    ssize_t  capacity;
+    ssize_t  size;
+
+    #ifdef HASH
+    size_t  currentSum;
+    #endif
+
+    #ifdef BIRTHINFO
+    size_t      birthLine;
+    const char *birthFile;
+    #endif
+
+    #ifdef STRUCTCANARY
+    canary_t rightCanary;
+    #endif
+} stack_;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -48,6 +78,9 @@ ISERROR stackVerifier (stack *stk)
         #endif
     }
 
+    else if (stk->capacity)
+        return WRONGSTACK;
+
     return NOTERROR;
 }
 
@@ -67,7 +100,7 @@ size_t hashCalculate (char *dataStructure, ssize_t dataStructureSize)
 #ifdef DATACANARY
 ISERROR movePointerOnCanaryCount (elem_t **data, int canaryCount)
 {
-    checkError(data, NULLPOINTER);
+    CHECKERROR(data, NULLPOINTER);
 
     canary_t *newData = (canary_t *) *data;
     newData += canaryCount;
@@ -78,7 +111,7 @@ ISERROR movePointerOnCanaryCount (elem_t **data, int canaryCount)
 
 ISERROR saveCanary (canary_t canary, canary_t *canaryPointer)
 {
-    checkError(canaryPointer, NULLPOINTER);
+    CHECKERROR(canaryPointer, NULLPOINTER);
 
     *canaryPointer = canary;
 
@@ -89,7 +122,7 @@ ISERROR saveCanary (canary_t canary, canary_t *canaryPointer)
 
 ISERROR simpleStackDump(stack *stk)
 {
-    checkError(stk, NULLPOINTER);
+    CHECKERROR(stk, NULLPOINTER);
 
     printf("{\n" BOLD "    Capacity: %lu\n    First free index: %lu\n" RESET,
            stk->capacity, stk->size);
@@ -122,7 +155,7 @@ ISERROR simpleStackDump(stack *stk)
             printf("    [%lu]:  ", idx);
             elementOutput(stk->data[idx]);
             if (stk->isPoison[idx])
-                printf(BOLDRED " (Poison)" RESET);
+                printf(BOLD RED " (Poison)" RESET);
 
             putchar('\n');
         }
@@ -139,11 +172,11 @@ ISERROR simpleStackDump(stack *stk)
 ISERROR stackDumpFunction (stack *stk, const char *stkName, 
                            const char *file, int line)
 {
-    checkError(stk, NULLPOINTER);
+    CHECKERROR(stk, NULLPOINTER);
 
     ISERROR ERROR = stackVerifier(stk);
     
-    printf(BOLDMAGENTA "Stack Dump at %s:%d\n" RESET BOLD "Stack %s[%p] " RESET, 
+    printf(BOLD MAGENTA "Stack Dump at %s:%d\n" RESET BOLD "Stack %s[%p] " RESET, 
            file, line, stkName + 1, stk);
 
     #ifdef BIRTHINFO
@@ -151,9 +184,9 @@ ISERROR stackDumpFunction (stack *stk, const char *stkName,
     #endif
     
     if (ERROR == NOTERROR)
-        printf(BOLDGREEN "(OK)\n" RESET);
+        printf(BOLD GREEN "(OK)\n" RESET);
     else
-        printf(BOLDRED "(ERROR: %x)\n" RESET, (int) ERROR);
+        printf(BOLD RED "(ERROR: %x)\n" RESET, (int) ERROR);
 
     simpleStackDump(stk);
 
@@ -162,18 +195,18 @@ ISERROR stackDumpFunction (stack *stk, const char *stkName,
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ISERROR stackConstructorFunction (stack *stk, ssize_t capacity, const char *file, size_t line)
+stack *stackConstructorFunction (ssize_t capacity, const char *file, size_t line)
 {
-    checkError(stk, NULLPOINTER);
+    stack *stk = (stack *) calloc (1, sizeof(stack));
 
     if (capacity < 0)
-        return WRONGSTACK;
+        return NULL;
 
     #ifdef MAXCAPACITY
     if (capacity <= maxCapacity)
         stk->capacity = capacity;
     else
-        return WRONGSIZE;
+        return NULL;
     #else
     stk->capacity = capacity;
     #endif
@@ -217,12 +250,16 @@ ISERROR stackConstructorFunction (stack *stk, ssize_t capacity, const char *file
     stk->birthFile = file;
     #endif
 
-    return NOTERROR;
+    return stk;
 }
 
-ISERROR stackDestructor (stack *stk)
+void stackDestructor (stack *stk)
 {
-    checkError(stk, NULLPOINTER);
+    if (stk)
+        return;
+
+    if (stackVerifier(stk) != NOTERROR)
+        return;
 
     stk->capacity    = 0;
     stk->size        = 0;
@@ -246,14 +283,15 @@ ISERROR stackDestructor (stack *stk)
     stk->data        = NULL;
     stk->isPoison    = NULL;
 
-    return NOTERROR;
+    free(stk);
+    stk = NULL;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ISERROR stackPushResize (stack *stk)
 {
-    checkError(stk, NULLPOINTER);
+    CHECKERROR(stk, NULLPOINTER);
 
     if (stk->size < stk->capacity)
         return NOTERROR;
@@ -291,9 +329,9 @@ ISERROR stackPushResize (stack *stk)
 
 ISERROR stackPush (stack *stk, elem_t element)
 {
-    checkError(stk,                            NULLPOINTER);
-    checkError(isfinite(element),              ISNOTFINITE);
-    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK );
+    CHECKERROR(stk,                            NULLPOINTER);
+    CHECKERROR(isfinite(element),              ISNOTFINITE);
+    CHECKERROR(stackVerifier(stk) == NOTERROR, WRONGSTACK );
 
     stackPushResize(stk);
 
@@ -304,7 +342,7 @@ ISERROR stackPush (stack *stk, elem_t element)
     stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
     #endif
 
-    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK);
+    CHECKERROR(stackVerifier(stk) == NOTERROR, WRONGSTACK);
 
     stk->size++;
 
@@ -340,9 +378,9 @@ ISERROR stackPopResize (stack *stk)
 
 ISERROR stackPop (stack *stk, elem_t *element)
 {
-    checkError(stk,                            NULLPOINTER);
-    checkError(stk->size > 0,                  POPOUTEMPTY);
-    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK );
+    CHECKERROR(stk,                            NULLPOINTER);
+    CHECKERROR(stk->size > 0,                  POPOUTEMPTY);
+    CHECKERROR(stackVerifier(stk) == NOTERROR, WRONGSTACK );
    
     stk->size--;
 
@@ -357,7 +395,7 @@ ISERROR stackPop (stack *stk, elem_t *element)
     stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
     #endif
 
-    checkError(stackVerifier(stk) == NOTERROR, WRONGSTACK);
+    CHECKERROR(stackVerifier(stk) == NOTERROR, WRONGSTACK);
 
     return NOTERROR;
 }
@@ -396,7 +434,7 @@ void elementOutput (const short element)
 
 void elementOutput (const void *element) 
 {
-    const elem_t Element = *(elem_t *) element;
+    const elem_t Element = *(const elem_t *) element;
     printf("%x", Element);
     return;
 }
