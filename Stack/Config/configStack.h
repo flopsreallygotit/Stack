@@ -3,11 +3,14 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#include <stdio.h>
+// Use -DSTRUCTCANARY for struct canaries inclusion.
+// Use -DDATACANARY   for data canaries inclusion.
+// Use -DHASH         for hash protection inclusion.
+// Use -DBIRTHINFO    for additional info about stack.
+// Use -DMAXCAPACITY  for limitation of stack capacity inclusion.
+// Or define / undef it here.
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-// Security config, undef or delete if you are not using it.
 
 #define STRUCTCANARY
 #define DATACANARY
@@ -19,6 +22,8 @@
 
 /// @brief Stack element type.
 typedef int elem_t;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// @brief Stack poison element type.
 const elem_t Poison = 0x666DED;
@@ -35,8 +40,6 @@ const ssize_t maxCapacity = 1e6;
 typedef unsigned long long canary_t;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-// WARNING: Change values below only if you know what you are doing.
 
 int calculateMaxLength (void);
 unsigned long long canaryGenerate (void);

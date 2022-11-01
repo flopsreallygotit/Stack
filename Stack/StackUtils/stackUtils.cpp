@@ -9,96 +9,41 @@
 struct stack_
 {
     #ifdef STRUCTCANARY
+
     canary_t leftCanary;
+
     #endif
 
     elem_t *data;
-    int    *isPoison;
 
-    ssize_t  capacity;
-    ssize_t  size;
+    size_t  capacity;
+    size_t  size;
 
     #ifdef HASH
+
     size_t  currentSum;
+
     #endif
 
     #ifdef BIRTHINFO
+
     size_t      birthLine;
     const char *birthFile;
+
     #endif
 
     #ifdef STRUCTCANARY
+
     canary_t rightCanary;
+
     #endif
-} stack_;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-ISERROR stackVerifier (stack *stk)
-{
-    if (stk->capacity && stk->data)
-    {
-        if (stk->size > stk->capacity)
-            dumpAndReturn(stk, WRONGSIZE);
-
-        if (stk->capacity <= 0 || stk->size < 0)
-            dumpAndReturn(stk, WRONGSIZE);
-
-        #ifdef HASH
-        if ((stk->currentSum) != hashCalculate((char *) stk->data, 
-                   (stk->capacity) * sizeof(elem_t)))
-            dumpAndReturn(stk, WRONGSUM);
-        #endif
-
-        #ifdef BIRTHINFO
-        if (stk->birthFile == NULL)
-            dumpAndReturn(stk, NULLPOINTER);
-        #endif
-
-        #ifdef STRUCTCANARY
-        if (stk->leftCanary  != Canary1)
-            dumpAndReturn(stk, LEFTCANARY);
-
-        if (stk->rightCanary != Canary2)
-            dumpAndReturn(stk, RIGHTCANARY);
-        #endif
-
-        #ifdef DATACANARY
-        movePointerOnCanaryCount(&(stk->data), -1);
-        if (*((canary_t *) stk->data) != Canary3)
-            dumpAndReturn(stk, DATALEFTCANARY);
-
-        movePointerOnCanaryCount(&(stk->data), 1);
-        stk->data += stk->capacity;
-
-        if (*((canary_t *) stk->data) != Canary4)
-            dumpAndReturn(stk, DATARIGHTCANARY);
-
-        stk->data -= stk->capacity;
-        #endif
-    }
-
-    else if (stk->capacity)
-        return WRONGSTACK;
-
-    return NOTERROR;
-}
-
-#ifdef HASH
-size_t hashCalculate (char *dataStructure, ssize_t dataStructureSize)
-{
-    size_t controlSum = 5381;
-    for (ssize_t idx = 1; idx < dataStructureSize; idx++)
-        controlSum += idx * dataStructure[idx];
-
-    return (((controlSum << 5) + controlSum) + 1);
-}
-#endif
+}stack_;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #ifdef DATACANARY
-ISERROR movePointerOnCanaryCount (elem_t **data, int canaryCount)
+
+static ISERROR movePointerOnCanaryCount (elem_t **data, int canaryCount)
 {
     CHECKERROR(data, NULLPOINTER);
 
@@ -109,7 +54,7 @@ ISERROR movePointerOnCanaryCount (elem_t **data, int canaryCount)
     return NOTERROR;
 }
 
-ISERROR saveCanary (canary_t canary, canary_t *canaryPointer)
+static ISERROR saveCanary (canary_t canary, canary_t *canaryPointer)
 {
     CHECKERROR(canaryPointer, NULLPOINTER);
 
@@ -117,10 +62,137 @@ ISERROR saveCanary (canary_t canary, canary_t *canaryPointer)
 
     return NOTERROR;
 }
+
 #endif
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ISERROR simpleStackDump(stack *stk)
+#ifdef HASH
+
+static size_t hashCalculate (stack *stk)
+{
+    size_t controlSum = 5381;
+
+    for (size_t idx = 1; idx < stk->capacity; idx++)
+        controlSum += idx * (stk->data[idx]);
+
+    return (((controlSum << 5) + controlSum) + 1);
+}
+
+#endif
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#define dumpAndReturn(stkPointer, returnValue) \
+{                                              \
+    simpleStackDump(stkPointer);               \
+    return returnValue;                        \
+}
+
+static ISERROR stackVerifier (stack *stk)
+{
+    if (stk->capacity && stk->data)
+    {
+        if (stk->size > stk->capacity)
+            dumpAndReturn(stk, WRONGSIZE);
+
+        #ifdef HASH
+
+        if ((stk->currentSum) != hashCalculate(stk))
+            dumpAndReturn(stk, WRONGSUM);
+
+        #endif
+
+        #ifdef BIRTHINFO
+
+        if (stk->birthFile == NULL)
+            dumpAndReturn(stk, NULLPOINTER);
+
+        #endif
+
+        #ifdef STRUCTCANARY
+
+        if (stk->leftCanary  != Canary1)
+            dumpAndReturn(stk, LEFTCANARY );
+
+        if (stk->rightCanary != Canary2)
+            dumpAndReturn(stk, RIGHTCANARY);
+
+        #endif
+
+        #ifdef DATACANARY
+
+        movePointerOnCanaryCount(&(stk->data), -1);
+
+        if (*((canary_t *) stk->data) != Canary3)
+            dumpAndReturn(stk, DATALEFTCANARY );
+
+        movePointerOnCanaryCount(&(stk->data),  1);
+
+        stk->data += stk->capacity;
+
+        if (*((canary_t *) stk->data) != Canary4)
+            dumpAndReturn(stk, DATARIGHTCANARY);
+
+        stk->data -= stk->capacity;
+
+        #endif
+    }
+
+    else if (stk->capacity)
+        return WRONGSTACK;
+
+    return NOTERROR;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static void elementOutput (const int element)
+{
+    printf("%d", element);
+    return;
+}
+
+static void elementOutput (const double element)
+{
+    printf("%lg", element);
+    return;
+}
+
+static void elementOutput (const char *element)
+{
+    printf("%s", element);
+    return;
+}
+
+static void elementOutput (const char element)
+{
+    printf("%c", element);
+    return;
+}
+
+static void elementOutput (const long element)
+{
+    printf("%ld", element);
+    return;
+}
+
+static void elementOutput (const short element) 
+{
+    printf("%hd", element);
+    return;
+}
+
+static void elementOutput (const void *element) 
+{
+    const elem_t Element = *(const elem_t *) element;
+    printf("%x", Element);
+    return;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ISERROR simpleStackDump (stack *stk)
 {
     CHECKERROR(stk, NULLPOINTER);
 
@@ -128,17 +200,22 @@ ISERROR simpleStackDump(stack *stk)
            stk->capacity, stk->size);
 
     #ifdef HASH
+
     printf(BOLD "    Current sum:  %ld\n" RESET, stk->currentSum);
+
     #endif
 
     #ifdef STRUCTCANARY
+
     printf(BOLD "    Left canary:  %llx\n    Right canary: %llx\n" RESET, 
            stk->leftCanary, stk->rightCanary);
+
     #endif
 
     if (stk->size > 0)
     {
         #ifdef DATACANARY
+
         movePointerOnCanaryCount(&(stk->data), -1);
 
         printf(BOLD "    Left data canary:  %llx\n" RESET, *(canary_t *) stk->data);
@@ -148,13 +225,16 @@ ISERROR simpleStackDump(stack *stk)
         stk->data += stk->capacity;
         printf(BOLD "    Right data canary: %llx\n" RESET, *(canary_t *) stk->data);
         stk->data -= stk->capacity;
+
         #endif
 
-        for (ssize_t idx = 0; idx < stk->capacity; idx++)
+        for (size_t idx = 0; idx < stk->capacity; idx++)
         {
             printf("    [%lu]:  ", idx);
+
             elementOutput(stk->data[idx]);
-            if (stk->isPoison[idx])
+
+            if (idx >= stk->size)
                 printf(BOLD RED " (Poison)" RESET);
 
             putchar('\n');
@@ -169,6 +249,8 @@ ISERROR simpleStackDump(stack *stk)
     return NOTERROR;
 }
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ISERROR stackDumpFunction (stack *stk, const char *stkName, 
                            const char *file, int line)
 {
@@ -176,45 +258,60 @@ ISERROR stackDumpFunction (stack *stk, const char *stkName,
 
     ISERROR ERROR = stackVerifier(stk);
     
-    printf(BOLD MAGENTA "Stack Dump at %s:%d\n" RESET BOLD "Stack %s[%p] " RESET, 
+    printf(BOLD MAGENTA "\nStack Dump at %s:%d\n" RESET BOLD "Stack %s[%p] " RESET, 
            file, line, stkName + 1, stk);
 
     #ifdef BIRTHINFO
+
     printf(BOLD "Birth at %s:%ld) - " RESET, stk->birthFile, stk->birthLine);
+
     #endif
     
     if (ERROR == NOTERROR)
         printf(BOLD GREEN "(OK)\n" RESET);
+
     else
         printf(BOLD RED "(ERROR: %x)\n" RESET, (int) ERROR);
 
     simpleStackDump(stk);
 
-    return NOTERROR;
+    return ERROR;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-stack *stackConstructorFunction (ssize_t capacity, const char *file, size_t line)
+stack *stackConstructorFunction (size_t capacity, const char *file, size_t line)
 {
     stack *stk = (stack *) calloc (1, sizeof(stack));
 
-    if (capacity < 0)
+    if (stk == NULL)
         return NULL;
 
     #ifdef MAXCAPACITY
+
     if (capacity <= maxCapacity)
         stk->capacity = capacity;
     else
         return NULL;
+
     #else
+
     stk->capacity = capacity;
+
     #endif
 
     stk->size = 0;
 
     #ifdef DATACANARY
+
     stk->data = (elem_t *) recalloc (stk->data, stk->capacity * sizeof(elem_t) + 2 * sizeof(canary_t));
+
+    if (stk->data == NULL)
+    {
+        free(stk);
+
+        return NULL;
+    }
 
     saveCanary(Canary3, (canary_t *) stk->data);
 
@@ -225,71 +322,92 @@ stack *stackConstructorFunction (ssize_t capacity, const char *file, size_t line
     stk->data -= capacity;
 
     #else
+
     stk->data = (elem_t *) calloc (stk->capacity, sizeof(elem_t));
-    #endif
 
-    stk->isPoison = (int *) calloc (stk->capacity, sizeof(int));
-
-    for (ssize_t idx = 0; idx < stk->capacity; idx++)
+    if (stk->data == NULL)
     {
-        stk->data[idx] = Poison;
-        stk->isPoison[idx] = 1;     
+        free(stk);
+
+        return NULL;
     }
 
+    #endif
+
+    for (size_t idx = 0; idx < stk->capacity; idx++)
+        stk->data[idx] = Poison;
+    
     #ifdef STRUCTCANARY
+
     stk->leftCanary  = Canary1;
     stk->rightCanary = Canary2;
+
     #endif
     
     #ifdef HASH
-    stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
+
+    stk->currentSum = hashCalculate(stk);
+
     #endif
 
     #ifdef BIRTHINFO
+
     stk->birthLine = line;
     stk->birthFile = file;
+
     #endif
 
     return stk;
 }
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 void stackDestructor (stack *stk)
 {
-    if (stk)
-        return;
-
-    if (stackVerifier(stk) != NOTERROR)
+    if (stk == NULL || stackVerifier(stk) != NOTERROR)
         return;
 
     stk->capacity    = 0;
     stk->size        = 0;
 
     #ifdef HASH
+
     stk->currentSum  = 0;
+
     #endif
 
     #ifdef DATACANARY
+
     movePointerOnCanaryCount(&(stk->data), -1);
+
     #endif
 
     #ifdef STRUCTCANARY
+
     stk->leftCanary  = 0;
     stk->rightCanary = 0;
+
+    #endif
+
+    #ifdef BIRTHINFO
+
+    stk->birthFile = NULL;
+    stk->birthLine = 0;
+
     #endif
 
     free(stk->data);
-    free(stk->isPoison);
-
-    stk->data        = NULL;
-    stk->isPoison    = NULL;
+    stk->data = NULL;
 
     free(stk);
     stk = NULL;
+
+    return;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ISERROR stackPushResize (stack *stk)
+static ISERROR stackPushResize (stack *stk)
 {
     CHECKERROR(stk, NULLPOINTER);
 
@@ -302,6 +420,7 @@ ISERROR stackPushResize (stack *stk)
         stk->capacity += 1;
 
     #ifdef DATACANARY
+
     movePointerOnCanaryCount(&(stk->data), -1);
 
     stk->data = (elem_t *) recalloc (stk->data, (stk->capacity) * sizeof(elem_t) + 2 * sizeof(canary_t));
@@ -313,19 +432,18 @@ ISERROR stackPushResize (stack *stk)
     stk->data -= stk->capacity;
 
     #else
+
     stk->data = (elem_t *) recalloc (stk->data, (stk->capacity) * sizeof(elem_t));
+
     #endif
 
-    stk->isPoison = (int *) recalloc (stk->isPoison, (stk->capacity) * sizeof(int));
-
-    for (ssize_t idx = stk->size; idx < stk->capacity; idx++)
-    {
+    for (size_t idx = stk->size; idx < stk->capacity; idx++)
         stk->data[idx] = Poison; 
-        stk->isPoison[idx] = 1;
-    }
-
+    
     return NOTERROR;
 }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ISERROR stackPush (stack *stk, elem_t element)
 {
@@ -336,20 +454,21 @@ ISERROR stackPush (stack *stk, elem_t element)
     stackPushResize(stk);
 
     stk->data[stk->size] = element;
-    stk->isPoison[stk->size] = 0;
 
     #ifdef HASH
-    stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
-    #endif
 
-    CHECKERROR(stackVerifier(stk) == NOTERROR, WRONGSTACK);
+    stk->currentSum = hashCalculate(stk);
+
+    #endif
 
     stk->size++;
 
-    return NOTERROR;
+    return stackVerifier(stk);
 }
 
-ISERROR stackPopResize (stack *stk)
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+static ISERROR stackPopResize (stack *stk)
 {
     if (stk->size > (stk->capacity) / 4)
         return NOTERROR;
@@ -357,6 +476,7 @@ ISERROR stackPopResize (stack *stk)
     stk->capacity /= 2;
 
     #ifdef DATACANARY
+
     movePointerOnCanaryCount(&(stk->data), -1);
 
     stk->data = (elem_t *) recalloc (stk->data, sizeof(elem_t) * (stk->capacity) + 2 * sizeof(canary_t));
@@ -368,13 +488,15 @@ ISERROR stackPopResize (stack *stk)
     stk->data -= stk->capacity;
 
     #else
-    stk->data = (elem_t *) recalloc (stk->data, sizeof(elem_t) * (stk->capacity));
-    #endif
 
-    stk->isPoison = (int *) recalloc (stk->isPoison, sizeof(int) * (stk->capacity));
+    stk->data = (elem_t *) recalloc (stk->data, sizeof(elem_t) * (stk->capacity));
+
+    #endif
 
     return NOTERROR;
 }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ISERROR stackPop (stack *stk, elem_t *element)
 {
@@ -388,55 +510,15 @@ ISERROR stackPop (stack *stk, elem_t *element)
         *element = stk->data[stk->size];
 
     stk->data[stk->size] = Poison;
-    stk->isPoison[stk->size] = 1;
     stackPopResize(stk);
 
     #ifdef HASH
-    stk->currentSum = hashCalculate((char *) stk->data, (stk->capacity) * sizeof(elem_t));
+
+    stk->currentSum = hashCalculate(stk);
+
     #endif
 
-    CHECKERROR(stackVerifier(stk) == NOTERROR, WRONGSTACK);
-
-    return NOTERROR;
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-void elementOutput (const int element)
-{
-    printf("%d", element);
-    return;
-}
-
-void elementOutput (const double element)
-{
-    printf("%lf", element);
-    return;
-}
-
-void elementOutput (const char element)
-{
-    printf("%c", element);
-    return;
-}
-
-void elementOutput (const long element)
-{
-    printf("%ld", element);
-    return;
-}
-
-void elementOutput (const short element) 
-{
-    printf("%hd", element);
-    return;
-}
-
-void elementOutput (const void *element) 
-{
-    const elem_t Element = *(const elem_t *) element;
-    printf("%x", Element);
-    return;
+    return stackVerifier(stk);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
