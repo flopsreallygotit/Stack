@@ -1,5 +1,5 @@
-#ifndef CONFIGSTACK
-#define CONFIGSTACK
+#ifndef STACK_CONFIG_H
+#define STACK_CONFIG_H
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
