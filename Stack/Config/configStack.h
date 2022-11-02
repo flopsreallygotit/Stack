@@ -3,6 +3,7 @@
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+// Setting security level:
 // Use -DSTRUCTCANARY for struct canaries inclusion.
 // Use -DDATACANARY   for data canaries inclusion.
 // Use -DHASH         for hash protection inclusion.
@@ -31,31 +32,33 @@ const elem_t Poison = 0x666DED;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #ifdef MAXCAPACITY
+
+/// @brief Max capacity of stack.
 const ssize_t maxCapacity = 1e6;
+
 #endif
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// @brief Canary type. Must be unsigned.
+/// @brief Canary type. 
 typedef unsigned long long canary_t;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-int calculateMaxLength (void);
-unsigned long long canaryGenerate (void);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 #ifdef STRUCTCANARY
-const canary_t Canary1 = canaryGenerate();
-const canary_t Canary2 = canaryGenerate();
+
+const canary_t Canary1 = 0xAB0BAAB0BA;
+const canary_t Canary2 = 0xBEB7ABEB7A;
+
 #endif
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #ifdef DATACANARY
-const canary_t Canary3 = canaryGenerate();
-const canary_t Canary4 = canaryGenerate();
+
+const canary_t Canary3 = 0xBADDED600DDEDA5;
+const canary_t Canary4 = 0xBADC0FFEEF07DED;
+
 #endif
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

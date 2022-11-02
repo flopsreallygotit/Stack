@@ -96,6 +96,11 @@ static ISERROR stackVerifier (stack *stk)
         if (stk->size > stk->capacity)
             dumpAndReturn(stk, WRONGSIZE);
 
+        #ifdef MAXCAPACITY
+        if (stk->capacity >= maxCapacity)
+            dumpAndReturn(stk, WRONGSIZE);
+        #endif
+
         #ifdef HASH
 
         if ((stk->currentSum) != hashCalculate(stk))
@@ -285,7 +290,10 @@ stack *stackConstructorFunction (size_t capacity, const char *file, size_t line)
     stack *stk = (stack *) calloc (1, sizeof(stack));
 
     if (stk == NULL)
+    {
+        PUTERROR("Can't allocate memory for stack.");
         return NULL;
+    }
 
     #ifdef MAXCAPACITY
 
@@ -308,6 +316,7 @@ stack *stackConstructorFunction (size_t capacity, const char *file, size_t line)
 
     if (stk->data == NULL)
     {
+        PUTERROR("Can't allocate memory for stack data.");
         free(stk);
 
         return NULL;
@@ -327,6 +336,7 @@ stack *stackConstructorFunction (size_t capacity, const char *file, size_t line)
 
     if (stk->data == NULL)
     {
+        PUTERROR("Can't allocate memory for stack data.");
         free(stk);
 
         return NULL;
@@ -364,8 +374,19 @@ stack *stackConstructorFunction (size_t capacity, const char *file, size_t line)
 
 void stackDestructor (stack *stk)
 {
-    if (stk == NULL || stackVerifier(stk) != NOTERROR)
+    if (stk == NULL)
+    {
+        PUTWARNING("You are trying to destruct nullpointer.");
+        
         return;
+    }
+
+    if (stackVerifier(stk) != NOTERROR)
+    {
+        PUTERROR("Can't destruct stack because it's wrong.");
+
+        return;
+    }
 
     stk->capacity    = 0;
     stk->size        = 0;

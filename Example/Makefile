@@ -1,24 +1,69 @@
-CXX=g++
-CXXFLAGS=-c -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations -Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts -Wconditionally-supported -Wconversion -Wctor-dtor-privacy -Wempty-body -Wfloat-equal -Winline -Wlogical-op -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual -Wpacked -Wpointer-arith -Winit-self -Wredundant-decls -Wshadow -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=2 -Wsuggest-attribute=noreturn -Wsuggest-final-methods -Wsuggest-final-types -Wsuggest-override -Wswitch-default -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wuseless-cast -Wvariadic-macros -Wno-literal-suffix -Wno-missing-field-initializers -Wno-narrowing -Wno-old-style-cast -Wno-varargs -Wstack-protector -fcheck-new -fsized-deallocation -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer -pie -fPIE
+# Makefile for example
 
-SOURCES=../Stack/Config/configStack.cpp ../Stack/StackUtils/stackUtils.cpp ../Stack/Universal/universalUtils.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MAIN=main.cpp
-MAINOBJECTS=$(MAIN:.cpp=.o)
-MAINEXECUTABLE=main
+# Configure compiler. (I use .cpp extension for files, so it must me g++)
+CXX = g++
 
-DIRFLAGS=-I../Stack/Universal -I../Stack/Config -I../Stack/StackUtils
+# Configure compile flags.
+CXXFLAGS = -Wall
 
-# STACKFLAGS=-DDATACANARY -DSTRUCTCANARY -DHASH -DBIRTHINFO -DMAXCAPACITY
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-all: $(SOURCES) MAINCOMPILE
-	
-MAINCOMPILE: $(OBJECTS) $(MAINOBJECTS)
-	@$(CXX) -g $(OBJECTS) $(MAINOBJECTS) -o $(MAINEXECUTABLE)
+# Configure directory flags.
+DIRFLAGS = -I../Stack/Universal -I../Stack/Config -I../Stack/StackUtils
 
+# Configure sources you need to compile
+SOURCES = main.cpp ../Stack/StackUtils/stackUtils.cpp ../Stack/Universal/universalUtils.cpp
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Pick executable name.
+EXECUTABLE ?= main
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# WARNING: Don't change values and commands below.
+
+# Making objects names from sources names
+OBJECTS = $(SOURCES:.cpp=.o)
+
+# # Making dependencies names from sources names
+# DEPENDS = $(SOURCES:.cpp=.d)
+
+# Adding directory flags to compiler flags.
+CXXFLAGS += $(DIRFLAGS)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# include $(DEPENDS)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.PHONY: all
+all: $(SOURCES) $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS)
+	@echo "Making executable from objects;"
+	@$(CXX) $(CXXFLAGS) $(OBJECTS) -o $@
+	@echo "Done;"
+
+.PHONY: .cpp.o
 .cpp.o:
-	@$(CXX) $(CXXFLAGS) $(DIRFLAGS) $(STACKFLAGS) $< -o $@
+	@echo "Making object file from $<;"
+	@$(CXX) -c $(CXXFLAGS) $< -o $@
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# %.d: %.cpp
+# 	@echo "Making dependence file: $<;"
+# 	$(CXX) -E $(CXXFLAGS) $< -MM -MT $(@:.d=.o) > $@
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.PHONY: clear
 clear:
-	@rm -rf $(OBJECTS) $(MAINOBJECTS) $(MAINEXECUTABLE)
+	@echo "Clearing object files and executable;";
+	@rm -rf $(OBJECTS) $(DEPENDS) $(EXECUTABLE)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
